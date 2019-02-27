@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>hw4</title>
+
+</head>
+<body>
+
+
+  <div align = "center">
+    <br/><br/><br/>
+    <h4>Enter URL for Container Shipping Companies List JSON File </h4>
+
+    <form name="myform" method="POST" id="location" >
+      <input type="text" name="URL" maxlength="255" size="50" value="containerlist.json" /> 
+      <br/><br/>
+      <input type="button" name="submit" value="Submit Query" onClick="viewJSON(this.form)" />
+    </form>
+  </div>
+
+
+  
+
+</body>
+
+<script type="text/javascript">
+//  Mainline{} -- Table{} -- Header{Data[ ]},Row[6elements]
+
+
+function viewJSON(what){   // this what is containerlist.json.form
+  var URL = what.URL.value;  //is it need to be deleted?
+  if(URL==""){ 
+    alert("the textarea is empty. Please give a file name in the textarea!");
+    exit();
+  }
+  function loadJSON(url) {
+    if (window.XMLHttpRequest)
+      {// code for IE7+, Firefox, Chrome, Opera, Safari
+       xmlhttp=new XMLHttpRequest();
+   } else {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");  }
+    xmlhttp.overrideMimeType("application/json");
+  xmlhttp.open("GET",url,false); // "synchronous"
+  xmlhttp.send();
+  jsonObj= JSON.parse(xmlhttp.responseText);
+  return jsonObj;   }
+
+  try{
+  jsonObj = loadJSON(URL);  //jsonObject gets loaded
+} catch(loadingerror){
+  alert("the file requested in the textarea is not found!");
+  exit();
+}
+
+
+
+
+ if (window.ActiveXObject) //if IE, simply execute script (due to async prop).
+   {  if (jsonObj.parseError.errorCode != 0) {
+    var myErr = jsonObj.parseError;
+    generateError(jsonObj);
+    hWin = window.open("", "Error", "height=300,width=340");
+    hWin.document.write(html_text);
+  } else {  generateHTML(jsonObj);  //the function generateHTML
+    hWin = window.open("", "Assignment4", "height=800,width=600");
+    hWin.document.write(html_text);   } 
+} else //else if FF, execute script once JSON object has loaded
+
+jsonObj.onload=generateHTML(jsonObj);
+hWin = window.open("", "Assignment4","scrollbars=yes", "height=800,width=600");
+hWin.document.write(html_text);  } 
+hWin.document.close(); 
+
+
+
+
+
+
+
+function generateHTML(jsonObj)   {
+  root=jsonObj.DocumentElement; 
+  html_text="<html><head></head><body><table border='2'><tbody><tr>"; 
+   // output the headers
+      
+   for( var int=0;int<jsonObj.Mainline.Table.Header.Data.length;int++){ 
+    header=jsonObj.Mainline.Table.Header.Data[int];
+    html_text+="<th>" + header + "</th>";
+  }    
+  html_text+="</tr>";
+
+
+
+// output out the values
+eachrow = jsonObj.Mainline.Table.Row;
+if(Object.keys(jsonObj.Mainline.Table).length == 1){
+  alert("No container shipping companies was found!");
+  exit();
+}
+for(var i=0;i<eachrow.length;i++) {                 
+        containerNodeList=eachrow[i]; //get properties of a plane (an object)
+        html_text+="<tr>";      //start a new row of the output table
+        var container_keys = Object.keys(containerNodeList);
+        
+        for(var j=0;j<6;j++) {
+          prop = container_keys[j];
+          
+          if (j == 0){              
+              html_text+="<td>"+ containerNodeList[prop] +"</td>";
+            }                
+            if (j == 1){              
+              html_text+="<td>"+ containerNodeList[prop] +"</td>";
+            }  if( j == 2){
+            html_text+="<td><ul>";
+            let hub_list_key = Object.keys(containerNodeList[prop].Hub);
+            var a = 0;
+            while(a<hub_list_key.length){
+              content = containerNodeList[prop].Hub[hub_list_key[a]];
+              if (a != 0){
+                html_text+="<li>"+content+"</li>";
+              }
+              else{
+                html_text+="<li><strong>"+content+"</strong></li>";
+              }
+              a++;
+            } 
+            html_text+="</td></ul>";
+          }
+          
+          if (j == 3){              
+              html_text+="<td>"+ containerNodeList[prop] +"</td>";
+            }  if (j == 4){
+            html_text+="<td><a href='"+containerNodeList[prop]+"' target='_Blank'>"+containerNodeList[prop]+"</a></td>";
+          }  
+           if(j == 5)   {//handle images separately 
+             let x= 150; let y=70;        
+             html_text+="<td><img src='"+ containerNodeList[prop] +"' width='"+x+"' height='"+y+"'></td>";
+           } 
+          }               
+          html_text+="</tr>";            
+        }                            
+        html_text+="</tbody></table></body></html>"; 
+      }
+
+
+    </script>
+    </html>
